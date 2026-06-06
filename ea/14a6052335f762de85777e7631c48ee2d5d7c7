@@ -1,0 +1,46 @@
+lib/src/core/melon_loader_platform.dart
+  s_2175d54edfbbe0::t_588cf0f0767e16 85-87,134-136,157-160,195-197,222-224
+  s_4010e760572b39::t_22227061c21072 262
+  s_4010e760572b39::t_ef56e73988ac7a 177,189-191
+  s_2175d54edfbbe0::t_1fb0f5bfee079c 7-8,62-66,70,74-77,84,88-89,124-125,141,143-147,152-155,161-165,167,178,181-184,186,194,198-201,211,227-233,248-260
+  s_4010e760572b39::t_6b301a9a1bd763 213-220,225,237-242,245-247
+lib/src/core/installer_state.dart
+  s_2175d54edfbbe0::t_1fb0f5bfee079c 13,304-309,311,315,343,349,355,367-372,377,379-382
+  s_2175d54edfbbe0::t_f91a28e5a71a8e 1,288-294,301-302,321,332-341,356,360
+  s_2175d54edfbbe0::t_588cf0f0767e16 357-359,361,373
+lib/src/core/debug_log.dart
+  s_2175d54edfbbe0::t_1fb0f5bfee079c 1-75,77-95
+  s_2175d54edfbbe0::t_588cf0f0767e16 76
+lib/src/core/adofai_game.dart
+  s_2175d54edfbbe0::t_588cf0f0767e16 111-113
+  s_2175d54edfbbe0::t_6fecb11a35da26 11,117-118,223-233,239-242,251-254,262,266,269,271,273-275,285-286,289,292-295,299,302,307,319-326,333
+lib/src/core/rhythm_doctor_game.dart
+  s_2175d54edfbbe0::t_4f0ac5e5416fa2 158
+  s_2175d54edfbbe0::t_6fecb11a35da26 11,150-152,164-167,174-177,184,187,190,192,194-196,206-207,210,213-216,219,222,227,238-247,253
+lib/src/core/dancing_line_game.dart
+  s_2175d54edfbbe0::t_6fecb11a35da26 11,150-152,158-159,164-167,174-177,184,187,190,192,194-196,206-207,210,213-216,219,222,227,238-247,253
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "ea14a6052335f762de85777e7631c48ee2d5d7c7",
+  "prompts": {},
+  "sessions": {
+    "s_2175d54edfbbe0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9cf6-0135-7a11-883c-6f819b71421a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "koren <131921956+kkorenn@users.noreply.github.com>"
+    },
+    "s_4010e760572b39": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b9554a92-1bf4-4579-9f1f-45174cc56949",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "koren <131921956+kkorenn@users.noreply.github.com>"
+    }
+  }
+}
