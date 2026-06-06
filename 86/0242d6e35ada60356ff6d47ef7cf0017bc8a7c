@@ -1,0 +1,21 @@
+lib/src/core/localization.dart
+  s_2175d54edfbbe0::t_1b45d45228b9fa 173,579
+lib/src/core/update_checker.dart
+  s_2175d54edfbbe0::t_1b45d45228b9fa 34,89,134-135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "860242d6e35ada60356ff6d47ef7cf0017bc8a7c",
+  "prompts": {},
+  "sessions": {
+    "s_2175d54edfbbe0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9cf6-0135-7a11-883c-6f819b71421a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "koren <131921956+kkorenn@users.noreply.github.com>"
+    }
+  }
+}
