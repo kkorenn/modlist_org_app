@@ -1,0 +1,50 @@
+macos/Runner/Release.entitlements
+  s_2175d54edfbbe0::t_9175a1ac53c698 5
+lib/src/core/app_errors.dart
+  s_2175d54edfbbe0::t_9175a1ac53c698 1-54
+lib/src/core/game.dart
+  s_2175d54edfbbe0::t_5d3cad4b44048f 128-129,177-179
+  s_2175d54edfbbe0::t_0ce3aaf3951542 261
+  s_2175d54edfbbe0::t_9175a1ac53c698 71-127,130-176,180-260,262-276
+lib/src/core/melon_loader_platform.dart
+  s_2175d54edfbbe0::t_9175a1ac53c698 1-109
+lib/src/core/adofai_game.dart
+  s_2175d54edfbbe0::t_9175a1ac53c698 10,19-28,224-225,232-235,239,263
+lib/src/core/dancing_line_game.dart
+  s_2175d54edfbbe0::t_5d3cad4b44048f 148-150,153-155
+  s_2175d54edfbbe0::t_9175a1ac53c698 10,19-27,158-159,164-167,192
+lib/src/ui/settings_tab.dart
+  s_2175d54edfbbe0::t_5d3cad4b44048f 33-35,50-52,60-62
+  s_2175d54edfbbe0::t_9175a1ac53c698 44-46
+lib/src/ui/explore_tab.dart
+  s_2175d54edfbbe0::t_f6726e89201246 1077
+  s_2175d54edfbbe0::t_5d3cad4b44048f 243-252
+  s_2175d54edfbbe0::t_9175a1ac53c698 8
+macos/Runner/DebugProfile.entitlements
+  s_2175d54edfbbe0::t_9175a1ac53c698 7
+lib/src/core/rhythm_doctor_game.dart
+  s_2175d54edfbbe0::t_9175a1ac53c698 10,19-27,158-159,164-167,192
+  s_2175d54edfbbe0::t_5d3cad4b44048f 148-150,153-155
+lib/src/core/localization.dart
+  s_2175d54edfbbe0::t_8a423a72fae1f4 105,107,116,118,123-127,377,379,388,390,395-399,589,591,600,602,607-611
+lib/src/core/installer_state.dart
+  s_2175d54edfbbe0::t_9175a1ac53c698 11,89-91,114-116,298,304,326,401,447,467,486,529
+lib/src/ui/installed_tab.dart
+  s_2175d54edfbbe0::t_271efb96380f79 5,62-69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "7a9403facfb9f2ebb9111f79295d9d85f939b7ae",
+  "prompts": {},
+  "sessions": {
+    "s_2175d54edfbbe0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9cf6-0135-7a11-883c-6f819b71421a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "koren <131921956+kkorenn@users.noreply.github.com>"
+    }
+  }
+}
