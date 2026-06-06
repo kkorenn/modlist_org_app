@@ -1,0 +1,31 @@
+lib/src/core/installer_state.dart
+  s_2175d54edfbbe0::t_aa920887dcaf88 266-283,300-314
+lib/src/core/localization.dart
+  s_2175d54edfbbe0::t_3a25ef96728967 185-188,407-410,622-625
+lib/src/core/melon_loader_platform.dart
+  s_2175d54edfbbe0::t_8ad26b196cb624 5,56-132
+lib/src/core/adofai_game.dart
+  s_2175d54edfbbe0::t_d15b4f3338863b 107,240,262-266,269
+lib/src/core/dancing_line_game.dart
+  s_2175d54edfbbe0::t_d15b4f3338863b 146,171,192-196,198
+lib/src/core/rhythm_doctor_game.dart
+  s_2175d54edfbbe0::t_d15b4f3338863b 146,171,192-196,198
+lib/src/core/game.dart
+  s_2175d54edfbbe0::t_8ad26b196cb624 7-8,286
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "acd308acf7756533285f6a389f208b69f176c396",
+  "prompts": {},
+  "sessions": {
+    "s_2175d54edfbbe0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9cf6-0135-7a11-883c-6f819b71421a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "koren <131921956+kkorenn@users.noreply.github.com>"
+    }
+  }
+}
