@@ -1,0 +1,33 @@
+lib/src/core/dancing_line_game.dart
+  s_4010e760572b39::t_28d97504edb49a 222-224
+lib/src/ui/installed_tab.dart
+  s_4010e760572b39::t_e723808ca1ba14 1
+  s_4010e760572b39::t_03b2ef62eeaee5 269-275
+lib/src/core/rhythm_doctor_game.dart
+  s_4010e760572b39::t_83beaf5532ed21 222-224
+lib/src/core/adofai_game.dart
+  s_4010e760572b39::t_b0dfe28bf4b0de 295-297
+lib/src/core/melon_loader_platform.dart
+  s_4010e760572b39::t_a6d15f27bfbedb 100-103,107
+  s_4010e760572b39::t_0105bf43e051f3 33-35,39,41-57
+lib/src/core/localization.dart
+  s_4010e760572b39::t_b56bdfc1870090 381-383,386,393-395,398,403-405,408
+  s_4010e760572b39::t_873c3a2543baa8 599-601,604,611-613,616,621-623,626
+  s_4010e760572b39::t_7ea8e161aed054 103-105,108,115-117,120,125-127,130
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "ff671f31095440ce882222cbfced6e3d7a99f570",
+  "prompts": {},
+  "sessions": {
+    "s_4010e760572b39": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b9554a92-1bf4-4579-9f1f-45174cc56949",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "koren <131921956+kkorenn@users.noreply.github.com>"
+    }
+  }
+}
