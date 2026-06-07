@@ -1,0 +1,30 @@
+lib/src/core/melon_loader_platform.dart
+  s_d5ee4f5ce9cc97::t_4a9cbb17f8d69f 22,190-193
+  s_d5ee4f5ce9cc97::t_8b01ac14fa0053 2,12-19,25-29,40,45-100,125-128,133-135
+lib/src/core/rhythm_doctor_game.dart
+  s_d5ee4f5ce9cc97::t_4b7d5c8fc8da77 237
+lib/src/core/localization.dart
+  s_d5ee4f5ce9cc97::t_4b7d5c8fc8da77 106,118,128,384,396,406,602,614,624
+test/melon_loader_platform_test.dart
+  s_d5ee4f5ce9cc97::t_8b01ac14fa0053 1-41
+lib/src/core/adofai_game.dart
+  s_d5ee4f5ce9cc97::t_4b7d5c8fc8da77 318
+lib/src/core/dancing_line_game.dart
+  s_d5ee4f5ce9cc97::t_4b7d5c8fc8da77 237
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "342cc24fa037d553b8dc5981717eeb365a54b0df",
+  "prompts": {},
+  "sessions": {
+    "s_d5ee4f5ce9cc97": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9fd4-90e2-77f0-b9c9-61f70a9fa24b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "koren <131921956+kkorenn@users.noreply.github.com>"
+    }
+  }
+}
