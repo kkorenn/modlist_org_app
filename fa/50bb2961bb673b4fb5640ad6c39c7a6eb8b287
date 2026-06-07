@@ -1,0 +1,23 @@
+test/melon_loader_platform_test.dart
+  s_d5ee4f5ce9cc97::t_62297a4a46ec14 52,54-55,57-69,74-75,77
+  s_d5ee4f5ce9cc97::t_e2a00619f93236 56,76
+  s_d5ee4f5ce9cc97::t_77ef29ac35b49c 70-73
+lib/src/core/melon_loader_platform.dart
+  s_d5ee4f5ce9cc97::t_45e88c35247043 319-327,350-354
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "fa50bb2961bb673b4fb5640ad6c39c7a6eb8b287",
+  "prompts": {},
+  "sessions": {
+    "s_d5ee4f5ce9cc97": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9fd4-90e2-77f0-b9c9-61f70a9fa24b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "koren <131921956+kkorenn@users.noreply.github.com>"
+    }
+  }
+}
