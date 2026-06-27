@@ -1,0 +1,44 @@
+lib/src/core/steam_config.dart
+  s_c961bf5056787a::t_5632c184188772 1-433
+lib/src/core/installer_state.dart
+  s_c961bf5056787a::t_a5932174c0c98f 7
+  s_c961bf5056787a::t_8f976bd61ab4a2 48-52
+  s_c961bf5056787a::t_98d5f3aa7513f7 430-481
+  s_c961bf5056787a::t_08b919c01fddfd 337-338
+  s_c961bf5056787a::t_876c673a2bd90e 385-388
+  s_c961bf5056787a::t_062ecfd97f9469 82-84
+  s_c961bf5056787a::t_099b3bd8de4f56 570
+test/steam_config_test.dart
+  s_c961bf5056787a::t_497dbbcb20cf8f 1-200
+lib/src/core/game.dart
+  s_c961bf5056787a::t_61bf7493defab8 81
+  s_c961bf5056787a::t_59dbe12ec13241 79-80,82-110
+lib/src/core/localization.dart
+  s_c961bf5056787a::t_fc033c1f1c8584 95-97
+  s_c961bf5056787a::t_fc97aba5dcb4c9 381-384
+  s_c961bf5056787a::t_526a848dfef1bf 666-667
+lib/src/core/dancing_line_game.dart
+  s_c961bf5056787a::t_1d618991eedac4 24-28
+  s_c961bf5056787a::t_438fb115cf81e0 23
+lib/src/ui/installed_tab.dart
+  s_c961bf5056787a::t_229c31cd9f7fd7 436-446
+lib/src/core/rhythm_doctor_game.dart
+  s_c961bf5056787a::t_a9cb480ecde24e 24-28
+  s_c961bf5056787a::t_f6dec2cda5e35a 23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "2ffb7908adfd7e030ce7e7c63c0d41cdf0fbbdc1",
+  "prompts": {},
+  "sessions": {
+    "s_c961bf5056787a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b5a37571-43d5-4cfe-a984-141c772cf99b",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "koren <131921956+kkorenn@users.noreply.github.com>"
+    }
+  }
+}
