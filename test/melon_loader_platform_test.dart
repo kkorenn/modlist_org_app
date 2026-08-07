@@ -43,6 +43,66 @@ void main() {
     });
 
     test(
+      'Linux helper prepares a whitespace-free directory symlink',
+      () async {
+        final tempDir = await Directory.systemTemp.createTemp(
+          'modlist_linux_helper_',
+        );
+        try {
+          final gameDir = Directory(p.join(tempDir.path, 'Test Game'));
+          final runtimeDir = Directory(p.join(tempDir.path, 'runtime'));
+          await gameDir.create();
+          await runtimeDir.create();
+
+          final helper = File(p.join(gameDir.path, 'setup_helper.sh'));
+          await helper.writeAsString(
+            MelonLoaderPlatform.setupHelperScript(),
+          );
+
+          final result = await Process.run('/bin/bash', [
+            helper.path,
+            '--prepare',
+          ], environment: {
+            ...Platform.environment,
+            'XDG_RUNTIME_DIR': runtimeDir.path,
+          });
+
+          expect(result.exitCode, 0, reason: result.stderr.toString());
+          final symlinks = <Link>[];
+          await for (final rootEntry in runtimeDir.list()) {
+            if (rootEntry is! Directory) continue;
+            await for (final entry in rootEntry.list(followLinks: false)) {
+              if (entry is Link) symlinks.add(entry);
+            }
+          }
+          expect(symlinks, hasLength(1));
+          expect(symlinks.single.path, isNot(contains(RegExp(r'\s'))));
+          expect(
+            await symlinks.single.resolveSymbolicLinks(),
+            await gameDir.resolveSymbolicLinks(),
+          );
+
+          final cleanupResult = await Process.run('/bin/bash', [
+            helper.path,
+            '--cleanup',
+          ], environment: {
+            ...Platform.environment,
+            'XDG_RUNTIME_DIR': runtimeDir.path,
+          });
+          expect(
+            cleanupResult.exitCode,
+            0,
+            reason: cleanupResult.stderr.toString(),
+          );
+          expect(await symlinks.single.exists(), isFalse);
+        } finally {
+          await tempDir.delete(recursive: true);
+        }
+      },
+      skip: !Platform.isLinux,
+    );
+
+    test(
       'forces arm64 launch helper for arm64 macOS installs',
       () {
         final script = MelonLoaderPlatform.setupHelperScript(

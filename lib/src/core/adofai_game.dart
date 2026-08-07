@@ -337,6 +337,8 @@ class AdofaiGame extends Game {
 
   @override
   Future<void> uninstallLoader(String gamePath) async {
+    await MelonLoaderPlatform.cleanupNativeInstall(gamePath);
+
     // 멜론로더 관련 파일 및 폴더 목록
     final targets = [
       'MelonLoader',

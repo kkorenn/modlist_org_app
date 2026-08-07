@@ -331,9 +331,66 @@ exec "$@"
 
     return r'''
 #!/bin/bash
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export LD_LIBRARY_PATH="$DIR:$LD_LIBRARY_PATH"
-export LD_PRELOAD="$DIR/libMelonLoader.so${LD_PRELOAD:+:$LD_PRELOAD}"
+set -u
+
+DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+PRELOAD_DIR="$DIR"
+
+# ld.so splits LD_PRELOAD on both colons and whitespace. Steam game folders
+# commonly contain spaces, so point it at a whitespace-free directory symlink.
+case "$DIR" in
+  *[[:space:]]*)
+    RUNTIME_ROOT="${XDG_RUNTIME_DIR:-/tmp}"
+    case "$RUNTIME_ROOT" in
+      *[[:space:]]*) RUNTIME_ROOT=/tmp ;;
+    esac
+
+    LINK_ROOT="$RUNTIME_ROOT/modlist-org-$UID"
+    LINK_NAME="$(basename -- "$DIR" | tr -cd '[:alnum:]_.-')"
+    [ -n "$LINK_NAME" ] || LINK_NAME=game
+    PRELOAD_DIR="$LINK_ROOT/$LINK_NAME"
+
+    if [ -L "$LINK_ROOT" ] || { [ -e "$LINK_ROOT" ] && [ ! -d "$LINK_ROOT" ]; }; then
+      echo "setup_helper.sh: symlink directory is not a directory: $LINK_ROOT" >&2
+      exit 1
+    fi
+    mkdir -p -m 700 -- "$LINK_ROOT" || exit 1
+    chmod 700 -- "$LINK_ROOT" || exit 1
+
+    if [ -L "$PRELOAD_DIR" ]; then
+      if [ "$(readlink -f -- "$PRELOAD_DIR")" != "$DIR" ]; then
+        ln -sfn -- "$DIR" "$PRELOAD_DIR" || exit 1
+      fi
+    elif [ -e "$PRELOAD_DIR" ]; then
+      echo "setup_helper.sh: symlink path already exists: $PRELOAD_DIR" >&2
+      exit 1
+    else
+      ln -s -- "$DIR" "$PRELOAD_DIR" || exit 1
+    fi
+    ;;
+esac
+
+# The installer invokes --prepare once so a broken symlink setup is reported
+# during installation instead of being discovered only when Steam starts.
+if [ "${1:-}" = "--prepare" ]; then
+  exit 0
+fi
+
+if [ "${1:-}" = "--cleanup" ]; then
+  if [ "$PRELOAD_DIR" != "$DIR" ] && [ -L "$PRELOAD_DIR" ] &&
+     [ "$(readlink -f -- "$PRELOAD_DIR")" = "$DIR" ]; then
+    rm -- "$PRELOAD_DIR"
+  fi
+  exit 0
+fi
+
+if [ "$#" -eq 0 ]; then
+  echo "Usage: $0 [--prepare] <game command> [arguments...]" >&2
+  exit 64
+fi
+
+export LD_LIBRARY_PATH="$PRELOAD_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export LD_PRELOAD="$PRELOAD_DIR/libMelonLoader.so${LD_PRELOAD:+:$LD_PRELOAD}"
 exec "$@"
 ''';
   }
@@ -390,7 +447,16 @@ fi
 
     final setupHelperPath = p.join(gamePath, 'setup_helper.sh');
     if (File(setupHelperPath).existsSync()) {
-      await _runIgnored('chmod', ['+x', setupHelperPath]);
+      final chmodExitCode = await _runIgnored('chmod', [
+        '+x',
+        setupHelperPath,
+      ]);
+      if (chmodExitCode != 0) {
+        throw FileSystemException(
+          'Could not make setup_helper.sh executable',
+          setupHelperPath,
+        );
+      }
     }
 
     if (isProtonOrWine) {
@@ -401,6 +467,17 @@ fi
     }
 
     if (Platform.isLinux) {
+      final prepareExitCode = await _runIgnored('/bin/bash', [
+        setupHelperPath,
+        '--prepare',
+      ]);
+      if (prepareExitCode != 0) {
+        throw FileSystemException(
+          'Could not prepare the whitespace-free MelonLoader symlink',
+          setupHelperPath,
+        );
+      }
+
       final libSoPath = p.join(gamePath, 'libMelonLoader.so');
       if (File(libSoPath).existsSync()) {
         await _runIgnored('chmod', ['+x', libSoPath]);
@@ -441,7 +518,16 @@ fi
     await DebugLog.info('MelonLoader configure finished');
   }
 
-  static Future<void> _runIgnored(
+  static Future<void> cleanupNativeInstall(String gamePath) async {
+    if (!Platform.isLinux) return;
+
+    final setupHelperPath = p.join(gamePath, 'setup_helper.sh');
+    if (!File(setupHelperPath).existsSync()) return;
+
+    await _runIgnored('/bin/bash', [setupHelperPath, '--cleanup']);
+  }
+
+  static Future<int> _runIgnored(
     String executable,
     List<String> arguments, {
     Duration timeout = const Duration(seconds: 8),
@@ -474,12 +560,14 @@ fi
         stdoutDone,
         stderrDone,
       ]).timeout(const Duration(seconds: 1), onTimeout: () => <void>[]);
+      return exitCode;
     } catch (e, stackTrace) {
       await DebugLog.error(
         'Command failed: $executable ${arguments.join(' ')}',
         error: e,
         stackTrace: stackTrace,
       );
+      return -1;
     }
   }
 

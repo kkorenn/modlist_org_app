@@ -257,6 +257,8 @@ class RhythmDoctorGame extends Game {
 
   @override
   Future<void> uninstallLoader(String gamePath) async {
+    await MelonLoaderPlatform.cleanupNativeInstall(gamePath);
+
     final targets = [
       'MelonLoader',
       'winhttp.dll',
