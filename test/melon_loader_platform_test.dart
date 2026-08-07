@@ -53,6 +53,9 @@ void main() {
           final runtimeDir = Directory(p.join(tempDir.path, 'runtime'));
           await gameDir.create();
           await runtimeDir.create();
+          await File(
+            p.join(gameDir.path, 'MelonLoader.Bootstrap.so'),
+          ).writeAsBytes(const []);
 
           final helper = File(p.join(gameDir.path, 'setup_helper.sh'));
           await helper.writeAsString(
@@ -80,6 +83,14 @@ void main() {
           expect(
             await symlinks.single.resolveSymbolicLinks(),
             await gameDir.resolveSymbolicLinks(),
+          );
+          expect(
+            MelonLoaderPlatform.setupHelperScript(),
+            contains(r'PRELOAD_DIR/MelonLoader.Bootstrap.so'),
+          );
+          expect(
+            MelonLoaderPlatform.setupHelperScript(),
+            isNot(contains('libMelonLoader.so')),
           );
 
           final cleanupResult = await Process.run('/bin/bash', [

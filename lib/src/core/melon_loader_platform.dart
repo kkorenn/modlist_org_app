@@ -336,6 +336,11 @@ set -u
 DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 PRELOAD_DIR="$DIR"
 
+if [ ! -f "$DIR/MelonLoader.Bootstrap.so" ]; then
+  echo "setup_helper.sh: MelonLoader Linux bootstrap was not found in $DIR" >&2
+  exit 1
+fi
+
 # ld.so splits LD_PRELOAD on both colons and whitespace. Steam game folders
 # commonly contain spaces, so point it at a whitespace-free directory symlink.
 case "$DIR" in
@@ -390,7 +395,7 @@ if [ "$#" -eq 0 ]; then
 fi
 
 export LD_LIBRARY_PATH="$PRELOAD_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-export LD_PRELOAD="$PRELOAD_DIR/libMelonLoader.so${LD_PRELOAD:+:$LD_PRELOAD}"
+export LD_PRELOAD="$PRELOAD_DIR/MelonLoader.Bootstrap.so${LD_PRELOAD:+:$LD_PRELOAD}"
 exec "$@"
 ''';
   }
@@ -478,9 +483,9 @@ fi
         );
       }
 
-      final libSoPath = p.join(gamePath, 'libMelonLoader.so');
-      if (File(libSoPath).existsSync()) {
-        await _runIgnored('chmod', ['+x', libSoPath]);
+      final bootstrapPath = p.join(gamePath, 'MelonLoader.Bootstrap.so');
+      if (File(bootstrapPath).existsSync()) {
+        await _runIgnored('chmod', ['+x', bootstrapPath]);
       }
     } else if (Platform.isMacOS) {
       // v0.7.3 ships MelonLoader.Bootstrap.dylib (the old libMelonLoader.dylib

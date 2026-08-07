@@ -51,14 +51,17 @@ class AdofaiGame extends Game {
     final winhttpDllAlt = File(p.join(gamePath, 'WinHttp.dll'));
     final versionDll = File(p.join(gamePath, 'version.dll'));
     final versionDllAlt = File(p.join(gamePath, 'Version.dll'));
-    final libMelonLoaderSo = File(p.join(gamePath, 'libMelonLoader.so'));
+    final melonLoaderBootstrapSo = File(
+      p.join(gamePath, 'MelonLoader.Bootstrap.so'),
+    );
     final libMelonLoaderDylib = File(p.join(gamePath, 'libMelonLoader.dylib'));
     final setupHelper = File(p.join(gamePath, 'setup_helper.sh'));
 
     final hasWinHttp = winhttpDll.existsSync() || winhttpDllAlt.existsSync();
     final hasVersionDll = versionDll.existsSync() || versionDllAlt.existsSync();
     final hasLibMelonLoader =
-        libMelonLoaderSo.existsSync() || libMelonLoaderDylib.existsSync();
+        melonLoaderBootstrapSo.existsSync() ||
+        libMelonLoaderDylib.existsSync();
     final hasSetupHelper = setupHelper.existsSync();
 
     return hasWinHttp || hasVersionDll || hasLibMelonLoader || hasSetupHelper;
@@ -347,6 +350,7 @@ class AdofaiGame extends Game {
       'setup_helper.sh',
       'melonloader-launch.sh',
       'MelonLoader.Bootstrap.dylib',
+      'MelonLoader.Bootstrap.so',
       'MelonLoader.Bootstrap.dylib.dSYM',
       'libMelonLoader.so',
       'libMelonLoader.dylib',
