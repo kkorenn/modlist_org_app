@@ -25,6 +25,24 @@ abstract class Game {
     }
   }
 
+  String getModArchiveGameName(String gamePath) {
+    return p.basenameWithoutExtension(getPlatformExeName());
+  }
+
+  String resolveModArchivePath(String archivePath, String gamePath) {
+    return archivePath
+        .replaceAll('\\', '/')
+        .replaceAll('__gamename__', getModArchiveGameName(gamePath));
+  }
+
+  bool isModArchiveGameRootPath(String archivePath) {
+    final firstPathPart = archivePath
+        .replaceAll('\\', '/')
+        .split('/')
+        .firstWhere((part) => part.isNotEmpty && part != '.', orElse: () => '');
+    return firstPathPart.contains('__gamename__');
+  }
+
   // 플랫폼별 스팀 라이브러리 기본 경로
   String getPlatformDefaultPath() {
     final home =
@@ -86,9 +104,7 @@ abstract class Game {
   }
 
   List<String> getSteamInstallCandidatePaths() {
-    final candidates = <String>[
-      getPlatformDefaultPath(),
-    ];
+    final candidates = <String>[getPlatformDefaultPath()];
 
     for (final steamLibrary in _steamLibraryPaths()) {
       final steamApps = _steamAppsPathForLibrary(steamLibrary);
@@ -141,9 +157,7 @@ abstract class Game {
   }
 
   String _normalizeSteamFolderName(String value) {
-    return value
-        .toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9]+'), '');
+    return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '');
   }
 
   List<String> _steamLibraryPaths() {
@@ -183,9 +197,7 @@ abstract class Game {
         r'C:\Program Files\Steam',
       ]);
     } else if (Platform.isMacOS) {
-      candidates.add(
-        p.join(home, 'Library', 'Application Support', 'Steam'),
-      );
+      candidates.add(p.join(home, 'Library', 'Application Support', 'Steam'));
     } else {
       candidates.addAll([
         p.join(home, '.steam', 'steam'),
@@ -340,6 +352,7 @@ abstract class Game {
   // UMM(Unity Mod Manager) 감지 여부
   bool isUmmDetected(String gamePath) {
     if (gamePath.isEmpty) return false;
+    if (_hasUmmBridgePlugin(gamePath)) return false;
 
     // 1. UnityModManager 폴더 존재 여부
     final ummFolder = Directory(p.join(gamePath, 'UnityModManager'));
@@ -421,6 +434,23 @@ abstract class Game {
     }
 
     return false;
+  }
+
+  bool _hasUmmBridgePlugin(String gamePath) {
+    final pluginsDir = Directory(p.join(gamePath, 'Plugins'));
+    if (!pluginsDir.existsSync()) return false;
+
+    try {
+      return pluginsDir
+          .listSync(followLinks: false)
+          .any(
+            (entity) =>
+                entity is File &&
+                p.basename(entity.path).toLowerCase() == 'ummbridge.dll',
+          );
+    } catch (_) {
+      return false;
+    }
   }
 
   // 특정 게임 경로의 유효성 검사 (실행 파일 존재 여부 등)
@@ -602,7 +632,9 @@ abstract class Game {
         final f1 = File(p.join(gamePath, 'Mods', '$cleanSlug.dll'));
         final f2 = File(p.join(gamePath, 'Plugins', '$cleanSlug.dll'));
         final f1d = File(p.join(gamePath, 'Mods', '$cleanSlug.dll.disabled'));
-        final f2d = File(p.join(gamePath, 'Plugins', '$cleanSlug.dll.disabled'));
+        final f2d = File(
+          p.join(gamePath, 'Plugins', '$cleanSlug.dll.disabled'),
+        );
         if (f1.existsSync()) {
           dllFile = f1;
         } else if (f2.existsSync()) {
@@ -639,7 +671,11 @@ abstract class Game {
   }
 
   // 모드 활성화 / 비활성화 (MelonLoader 모드 대상)
-  Future<void> toggleModActive(String gamePath, InstalledMod mod, bool enable) async {
+  Future<void> toggleModActive(
+    String gamePath,
+    InstalledMod mod,
+    bool enable,
+  ) async {
     if (mod.id.startsWith('umm-')) {
       return; // UMM 모드는 자체 기능이 있으므로 제외
     }

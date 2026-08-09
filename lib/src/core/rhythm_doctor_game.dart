@@ -22,9 +22,9 @@ class RhythmDoctorGame extends Game {
 
   @override
   List<String> getSteamInstallFolderNames() => const [
-        'Rhythm Doctor',
-        'RhythmDoctor',
-      ];
+    'Rhythm Doctor',
+    'RhythmDoctor',
+  ];
 
   @override
   String getPlatformExeName() {
@@ -102,8 +102,7 @@ class RhythmDoctorGame extends Game {
     final hasWinHttp = winhttpDll.existsSync() || winhttpDllAlt.existsSync();
     final hasVersionDll = versionDll.existsSync() || versionDllAlt.existsSync();
     final hasLibMelonLoader =
-        melonLoaderBootstrapSo.existsSync() ||
-        libMelonLoaderDylib.existsSync();
+        melonLoaderBootstrapSo.existsSync() || libMelonLoaderDylib.existsSync();
     final hasSetupHelper = setupHelper.existsSync();
 
     return hasWinHttp || hasVersionDll || hasLibMelonLoader || hasSetupHelper;
@@ -158,7 +157,9 @@ class RhythmDoctorGame extends Game {
       );
     }
 
-    await DebugLog.info('Rhythm Doctor installLoader start: gamePath=$gamePath');
+    await DebugLog.info(
+      'Rhythm Doctor installLoader start: gamePath=$gamePath',
+    );
 
     final hasWindowsExe =
         File(p.join(gamePath, 'Rhythm Doctor.exe')).existsSync() ||
@@ -345,7 +346,11 @@ class RhythmDoctorGame extends Game {
 
     if (isZip && archive != null) {
       bool hasStructuredDirs = false;
+      bool hasGameRootPath = false;
       for (final archiveFile in archive) {
+        if (isModArchiveGameRootPath(archiveFile.name)) {
+          hasGameRootPath = true;
+        }
         final normalizedPath = archiveFile.name
             .replaceAll('\\', '/')
             .toLowerCase();
@@ -358,18 +363,17 @@ class RhythmDoctorGame extends Game {
             firstDir == 'plugins' ||
             firstDir == 'userlibs') {
           hasStructuredDirs = true;
-          break;
         }
       }
 
-      final String targetBaseDir = hasStructuredDirs
+      final String targetBaseDir = hasStructuredDirs || hasGameRootPath
           ? gamePath
           : p.join(gamePath, 'Mods');
 
       for (final archiveFile in archive) {
-        final filename = archiveFile.name;
+        final filename = resolveModArchivePath(archiveFile.name, gamePath);
         final outPath = p.join(targetBaseDir, filename);
-        final relativePath = hasStructuredDirs
+        final relativePath = hasStructuredDirs || hasGameRootPath
             ? filename
             : p.join('Mods', filename);
 
@@ -429,7 +433,10 @@ class RhythmDoctorGame extends Game {
     final ext = p.extension(filePath).toLowerCase();
 
     // 파일명에서 버전 정보 제거하여 일관된 slug 획득 (예: Tweaks_v1.0.0 -> Tweaks)
-    final cleanName = filenameNoExt.replaceAll(RegExp(r'[-_\s]+v?[0-9]+(?:\.[0-9]+)*.*$'), '');
+    final cleanName = filenameNoExt.replaceAll(
+      RegExp(r'[-_\s]+v?[0-9]+(?:\.[0-9]+)*.*$'),
+      '',
+    );
     final baseSlug = cleanName.isEmpty ? filenameNoExt : cleanName;
 
     final List<String> installedFiles = [];
@@ -455,13 +462,16 @@ class RhythmDoctorGame extends Game {
     // MelonLoader DLL 파싱 (MelonInfo 속성 추출)
     if (isZip && archive != null) {
       for (final archiveFile in archive) {
-        if (archiveFile.isFile && p.extension(archiveFile.name).toLowerCase() == '.dll') {
+        if (archiveFile.isFile &&
+            p.extension(archiveFile.name).toLowerCase() == '.dll') {
           try {
             final tempDir = await getTemporaryDirectory();
-            final tempDllFile = File(p.join(
-              tempDir.path,
-              'temp_parse_${DateTime.now().microsecondsSinceEpoch}.dll',
-            ));
+            final tempDllFile = File(
+              p.join(
+                tempDir.path,
+                'temp_parse_${DateTime.now().microsecondsSinceEpoch}.dll',
+              ),
+            );
             await tempDllFile.writeAsBytes(archiveFile.content as List<int>);
             final info = MelonDllParser.parse(tempDllFile.path);
             try {
@@ -470,7 +480,10 @@ class RhythmDoctorGame extends Game {
             if (info != null) {
               finalName = info.name;
               finalVersion = info.version;
-              finalSlug = info.name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9_-]'), '-');
+              finalSlug = info.name.toLowerCase().replaceAll(
+                RegExp(r'[^a-z0-9_-]'),
+                '-',
+              );
               break;
             }
           } catch (_) {}
@@ -482,7 +495,10 @@ class RhythmDoctorGame extends Game {
         if (info != null) {
           finalName = info.name;
           finalVersion = info.version;
-          finalSlug = info.name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9_-]'), '-');
+          finalSlug = info.name.toLowerCase().replaceAll(
+            RegExp(r'[^a-z0-9_-]'),
+            '-',
+          );
         }
       } catch (_) {}
     }
@@ -490,9 +506,11 @@ class RhythmDoctorGame extends Game {
     // 기존 모드가 설치되어 있는 경우 안전하게 먼저 언인스톨을 수행합니다.
     try {
       final matchingMods = installedMods
-          .where((m) =>
-              isModMatched(m.slug, finalSlug) ||
-              m.id.toLowerCase() == finalSlug.toLowerCase())
+          .where(
+            (m) =>
+                isModMatched(m.slug, finalSlug) ||
+                m.id.toLowerCase() == finalSlug.toLowerCase(),
+          )
           .toList();
       for (final matching in matchingMods) {
         await uninstallMod(gamePath, matching.slug);
@@ -506,7 +524,11 @@ class RhythmDoctorGame extends Game {
 
     if (isZip && archive != null) {
       bool hasStructuredDirs = false;
+      bool hasGameRootPath = false;
       for (final archiveFile in archive) {
+        if (isModArchiveGameRootPath(archiveFile.name)) {
+          hasGameRootPath = true;
+        }
         final normalizedPath = archiveFile.name
             .replaceAll('\\', '/')
             .toLowerCase();
@@ -519,18 +541,17 @@ class RhythmDoctorGame extends Game {
             firstDir == 'plugins' ||
             firstDir == 'userlibs') {
           hasStructuredDirs = true;
-          break;
         }
       }
 
-      final String targetBaseDir = hasStructuredDirs
+      final String targetBaseDir = hasStructuredDirs || hasGameRootPath
           ? gamePath
           : p.join(gamePath, 'Mods');
 
       for (final archiveFile in archive) {
-        final filename = archiveFile.name;
+        final filename = resolveModArchivePath(archiveFile.name, gamePath);
         final outPath = p.join(targetBaseDir, filename);
-        final relativePath = hasStructuredDirs
+        final relativePath = hasStructuredDirs || hasGameRootPath
             ? filename
             : p.join('Mods', filename);
 
@@ -550,7 +571,10 @@ class RhythmDoctorGame extends Game {
       if (!modsDir.existsSync()) {
         await modsDir.create(recursive: true);
       }
-      final sanitizedFileName = finalName.replaceAll(RegExp(r'[\\/:*?"<>|]'), '');
+      final sanitizedFileName = finalName.replaceAll(
+        RegExp(r'[\\/:*?"<>|]'),
+        '',
+      );
       final destFileName = '$sanitizedFileName$ext';
       final destPath = p.join(modsDir.path, destFileName);
       final destFile = File(destPath);
@@ -689,7 +713,9 @@ class RhythmDoctorGame extends Game {
     }
 
     final fallbackDll = File(p.join(gamePath, 'Mods', '$modSlug.dll'));
-    final fallbackDllD = File(p.join(gamePath, 'Mods', '$modSlug.dll.disabled'));
+    final fallbackDllD = File(
+      p.join(gamePath, 'Mods', '$modSlug.dll.disabled'),
+    );
     if (fallbackDll.existsSync() &&
         !sharedFiles.contains('mods/${modSlug.toLowerCase()}.dll')) {
       await fallbackDll.delete();
@@ -743,7 +769,8 @@ class RhythmDoctorGame extends Game {
         final disabledPath = '$fullPath.disabled';
         if (FileSystemEntity.isFileSync(fullPath) ||
             FileSystemEntity.isDirectorySync(fullPath) ||
-            (relPath.toLowerCase().endsWith('.dll') && FileSystemEntity.isFileSync(disabledPath))) {
+            (relPath.toLowerCase().endsWith('.dll') &&
+                FileSystemEntity.isFileSync(disabledPath))) {
           exists = true;
           break;
         }
@@ -751,9 +778,15 @@ class RhythmDoctorGame extends Game {
 
       if (metaMod.installedFiles.isEmpty) {
         final modDll = File(p.join(gamePath, 'Mods', '${metaMod.slug}.dll'));
-        final pluginDll = File(p.join(gamePath, 'Plugins', '${metaMod.slug}.dll'));
-        final modDllD = File(p.join(gamePath, 'Mods', '${metaMod.slug}.dll.disabled'));
-        final pluginDllD = File(p.join(gamePath, 'Plugins', '${metaMod.slug}.dll.disabled'));
+        final pluginDll = File(
+          p.join(gamePath, 'Plugins', '${metaMod.slug}.dll'),
+        );
+        final modDllD = File(
+          p.join(gamePath, 'Mods', '${metaMod.slug}.dll.disabled'),
+        );
+        final pluginDllD = File(
+          p.join(gamePath, 'Plugins', '${metaMod.slug}.dll.disabled'),
+        );
         if (modDll.existsSync() ||
             pluginDll.existsSync() ||
             modDllD.existsSync() ||
@@ -789,13 +822,28 @@ class RhythmDoctorGame extends Game {
         final entities = modsDir.listSync();
         for (final entity in entities) {
           final isDll = p.extension(entity.path).toLowerCase() == '.dll';
-          final isDllDisabled = entity.path.toLowerCase().endsWith('.dll.disabled');
+          final isDllDisabled = entity.path.toLowerCase().endsWith(
+            '.dll.disabled',
+          );
           if (entity is File && (isDll || isDllDisabled)) {
             final fileName = isDllDisabled
-                ? p.basename(entity.path).substring(0, p.basename(entity.path).length - '.disabled'.length)
+                ? p
+                      .basename(entity.path)
+                      .substring(
+                        0,
+                        p.basename(entity.path).length - '.disabled'.length,
+                      )
                 : p.basenameWithoutExtension(entity.path);
             final relPath = isDllDisabled
-                ? p.join('Mods', p.basename(entity.path).substring(0, p.basename(entity.path).length - '.disabled'.length))
+                ? p.join(
+                    'Mods',
+                    p
+                        .basename(entity.path)
+                        .substring(
+                          0,
+                          p.basename(entity.path).length - '.disabled'.length,
+                        ),
+                  )
                 : p.join('Mods', p.basename(entity.path));
             final normalizedRelPath = relPath.toLowerCase().replaceAll(
               '\\',
@@ -817,7 +865,10 @@ class RhythmDoctorGame extends Game {
               if (info != null) {
                 finalName = info.name;
                 finalVersion = info.version;
-                slug = info.name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9_-]'), '-');
+                slug = info.name.toLowerCase().replaceAll(
+                  RegExp(r'[^a-z0-9_-]'),
+                  '-',
+                );
               }
             } catch (_) {}
 
@@ -844,13 +895,28 @@ class RhythmDoctorGame extends Game {
         final entities = pluginsDir.listSync();
         for (final entity in entities) {
           final isDll = p.extension(entity.path).toLowerCase() == '.dll';
-          final isDllDisabled = entity.path.toLowerCase().endsWith('.dll.disabled');
+          final isDllDisabled = entity.path.toLowerCase().endsWith(
+            '.dll.disabled',
+          );
           if (entity is File && (isDll || isDllDisabled)) {
             final fileName = isDllDisabled
-                ? p.basename(entity.path).substring(0, p.basename(entity.path).length - '.disabled'.length)
+                ? p
+                      .basename(entity.path)
+                      .substring(
+                        0,
+                        p.basename(entity.path).length - '.disabled'.length,
+                      )
                 : p.basenameWithoutExtension(entity.path);
             final relPath = isDllDisabled
-                ? p.join('Plugins', p.basename(entity.path).substring(0, p.basename(entity.path).length - '.disabled'.length))
+                ? p.join(
+                    'Plugins',
+                    p
+                        .basename(entity.path)
+                        .substring(
+                          0,
+                          p.basename(entity.path).length - '.disabled'.length,
+                        ),
+                  )
                 : p.join('Plugins', p.basename(entity.path));
             final normalizedRelPath = relPath.toLowerCase().replaceAll(
               '\\',
@@ -872,7 +938,10 @@ class RhythmDoctorGame extends Game {
               if (info != null) {
                 finalName = '${info.name} (Plugin)';
                 finalVersion = info.version;
-                slug = info.name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9_-]'), '-');
+                slug = info.name.toLowerCase().replaceAll(
+                  RegExp(r'[^a-z0-9_-]'),
+                  '-',
+                );
               }
             } catch (_) {}
 
@@ -934,7 +1003,8 @@ class RhythmDoctorGame extends Game {
     } catch (_) {}
 
     final folderName = p.basename(gamePath).toLowerCase();
-    if (folderName.contains('rhythm doctor') || folderName.contains('rhythmdoctor')) {
+    if (folderName.contains('rhythm doctor') ||
+        folderName.contains('rhythmdoctor')) {
       return true;
     }
 
