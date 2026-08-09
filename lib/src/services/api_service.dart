@@ -384,7 +384,7 @@ class ApiService {
   }
 
   // 302 리디렉션 헤더에서 실제 다운로드 URL 추출 및 다운로드 카운팅 트리거
-  Future<String> getDownloadUrl(String slug, {String? version, bool isBeta = false}) async {
+  Future<String> getDownloadUrl(String slug, {String? version, bool isBeta = false, String? platform}) async {
     final baseUrl = await getBaseUrl();
     
     final queryParams = <String, String>{};
@@ -393,6 +393,9 @@ class ApiService {
     }
     if (isBeta) {
       queryParams['beta'] = 'true';
+    }
+    if (platform != null && platform.isNotEmpty) {
+      queryParams['platform'] = platform;
     }
 
     final uri = Uri.parse('$baseUrl/api/mods/$slug/download').replace(queryParameters: queryParams);

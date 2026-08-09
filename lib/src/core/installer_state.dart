@@ -66,6 +66,12 @@ class InstallerState extends ChangeNotifier {
 
   String get gamePath => _gamePath;
   String get apiUrl => _apiUrl;
+  String get platform {
+    if (Platform.isWindows) return 'windows';
+    if (Platform.isMacOS) return 'macos';
+    if (Platform.isLinux) return 'linux';
+    return Platform.operatingSystem;
+  }
   bool get isLoaderInstalled => _isLoaderInstalled;
   bool get isValidPath => _isValidPath;
   List<InstalledMod> get installedMods => _installedMods;
@@ -516,6 +522,7 @@ class InstallerState extends ChangeNotifier {
       mod.slug,
       version: targetVersion.isNotEmpty ? targetVersion : null,
       isBeta: isBeta,
+      platform: platform,
     );
 
     _statusMessage = t('status_mod_downloading', args: {'name': mod.name});

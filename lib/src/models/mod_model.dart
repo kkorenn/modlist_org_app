@@ -34,6 +34,7 @@ class ModVersion {
   final bool isBeta;
   final String createdAt;
   final String? gameVersion;
+  final List<String> availablePlatforms;
 
   ModVersion({
     required this.version,
@@ -43,6 +44,7 @@ class ModVersion {
     this.isBeta = false,
     required this.createdAt,
     this.gameVersion,
+    this.availablePlatforms = const [],
   });
 
   factory ModVersion.fromJson(Map<String, dynamic> json) {
@@ -54,6 +56,7 @@ class ModVersion {
       isBeta: json['isBeta'] ?? false,
       createdAt: json['createdAt'] ?? '',
       gameVersion: json['gameVersion'],
+      availablePlatforms: List<String>.from(json['availablePlatforms'] ?? []),
     );
   }
 }
