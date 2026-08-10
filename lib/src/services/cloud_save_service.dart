@@ -40,7 +40,8 @@ class CloudSaveService {
             final ext = p.extension(file.path).toLowerCase();
             if (const {
               '.dll', '.exe', '.pdb', '.so', '.dylib',
-              '.zip', '.rar', '.7z', '.tar', '.gz',
+              '.zip', '.rar', '.7z', '.tar', '.gz', '.xz', '.zst', '.zstd',
+              '.txz', '.tzst',
               '.unity3d', '.assets', '.bundle', '.ress', '.cab', '.resource'
             }.contains(ext)) {
               continue;

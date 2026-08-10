@@ -2,11 +2,16 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import '../models/mod_model.dart';
+import 'archive_decoder.dart';
 import 'melon_dll_parser.dart';
 
 enum LoaderInstallPhase { extracting, configuring, finalizing }
 
 abstract class Game {
+  Future<DecodedArchive> decodeModArchive(List<int> bytes) {
+    return ModArchiveDecoder.decode(bytes);
+  }
+
   // 게임 고유 식별자 (예: 'adofai')
   String get id;
 

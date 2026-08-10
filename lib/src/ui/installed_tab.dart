@@ -227,7 +227,16 @@ class _InstalledTabState extends State<InstalledTab> {
     try {
       final FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['zip', 'dll'],
+        allowedExtensions: [
+          'zip',
+          'dll',
+          'tar',
+          'xz',
+          'zst',
+          'zstd',
+          'txz',
+          'tzst',
+        ],
         dialogTitle: widget.state.t('installed_btn_add_mod_manually'),
       );
 

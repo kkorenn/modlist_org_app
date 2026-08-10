@@ -282,8 +282,12 @@ class AdofaiGame extends Game {
     final file = File(tempZipPath);
     final bytes = await file.readAsBytes();
     await DebugLog.info('ADOFAI temp zip read: bytes=${bytes.length}');
-    final archive = ZipDecoder().decodeBytes(bytes);
-    await DebugLog.info('ADOFAI zip decoded: entries=${archive.length}');
+    final decodedArchive = await decodeModArchive(bytes);
+    final archive = decodedArchive.archive;
+    if (archive == null) {
+      throw Exception('MelonLoader archive format is not supported.');
+    }
+    await DebugLog.info('ADOFAI archive decoded: entries=${archive.length}');
 
     var extractedFiles = 0;
     var extractedDirs = 0;
@@ -415,15 +419,10 @@ class AdofaiGame extends Game {
     final List<String> installedFiles = [];
     final fileBytes = await file.readAsBytes();
 
-    // zip 여부 확인 및 아카이브 스캔
-    bool isZip = false;
-    Archive? archive;
-    try {
-      archive = ZipDecoder().decodeBytes(fileBytes);
-      isZip = archive.isNotEmpty;
-    } catch (_) {
-      isZip = false;
-    }
+    // 아카이브 확인 및 스캔
+    final decodedArchive = await decodeModArchive(fileBytes);
+    final archive = decodedArchive.archive;
+    final decodedBytes = decodedArchive.bytes;
 
     final List<String> infoJsonPaths = [];
     bool isUmm = false;
@@ -431,7 +430,7 @@ class AdofaiGame extends Game {
     String finalName = mod.name;
     String ummFolder = mod.slug;
 
-    if (isZip && archive != null) {
+    if (archive != null) {
       // 2. 모드 포맷(UMM vs MelonLoader) 감지
 
       for (final archiveFile in archive) {
@@ -492,7 +491,7 @@ class AdofaiGame extends Game {
     // 언인스톨 수행 후의 최신 로컬 메타데이터 목록 로드
     final updatedInstalledMods = await getInstalledMods(gamePath);
 
-    if (isZip && archive != null) {
+    if (archive != null) {
       if (isUmm) {
         // UMM 모드 설치 로직
         final ummBaseDir = Directory(p.join(gamePath, 'UMMMods'));
@@ -505,7 +504,7 @@ class AdofaiGame extends Game {
             .map((path) => p.dirname(path))
             .toList();
 
-        // 만약 부모 폴더가 루트("")밖에 없다면, zip 내용물을 UMMMods/<ummFolder> 폴더 아래에 생성
+        // 만약 부모 폴더가 루트("")밖에 없다면, 아카이브 내용물을 UMMMods/<ummFolder> 폴더 아래에 생성
         final bool isRootOnly = parentFolders.every(
           (parent) => parent == '.' || parent == '',
         );
@@ -535,7 +534,7 @@ class AdofaiGame extends Game {
           }
         }
       } else {
-        // MelonLoader 모드 설치 로직
+        // MelonLoader 모드 설치
         bool hasStructuredDirs = false;
         bool hasGameRootPath = false;
         for (final archiveFile in archive) {
@@ -581,14 +580,14 @@ class AdofaiGame extends Game {
         }
       }
     } else {
-      // 3. zip이 아니면 단일 DLL 파일이므로 MelonLoader 모드 (Mods/<slug>.dll) 로 저장
+      // 아카이브가 아니면 단일 DLL 파일로 저장
       final modsDir = Directory(p.join(gamePath, 'Mods'));
       if (!modsDir.existsSync()) {
         await modsDir.create(recursive: true);
       }
       final destPath = p.join(modsDir.path, '${mod.slug}.dll');
       final destFile = File(destPath);
-      await destFile.writeAsBytes(fileBytes);
+      await destFile.writeAsBytes(decodedBytes);
       installedFiles.add(p.join('Mods', '${mod.slug}.dll'));
     }
 
@@ -640,16 +639,9 @@ class AdofaiGame extends Game {
     // 파일 추출 전에 로컬 메타데이터를 먼저 불러옵니다.
     final installedMods = await getInstalledMods(gamePath);
 
-    bool isZip = ext == '.zip';
-    Archive? archive;
-    if (isZip) {
-      try {
-        archive = ZipDecoder().decodeBytes(fileBytes);
-        isZip = archive.isNotEmpty;
-      } catch (_) {
-        isZip = false;
-      }
-    }
+    final decodedArchive = await decodeModArchive(fileBytes);
+    final archive = decodedArchive.archive;
+    final decodedBytes = decodedArchive.bytes;
 
     final List<String> infoJsonPaths = [];
     bool isUmm = false;
@@ -658,7 +650,7 @@ class AdofaiGame extends Game {
     String finalVersion = 'Local';
     String ummFolder = baseSlug;
 
-    if (isZip && archive != null) {
+    if (archive != null) {
       // UMM vs MelonLoader 감지
       for (final archiveFile in archive) {
         final filename = archiveFile.name;
@@ -701,7 +693,7 @@ class AdofaiGame extends Game {
 
     // MelonLoader DLL 파싱 (MelonInfo 속성 추출)
     if (!isUmm) {
-      if (isZip && archive != null) {
+      if (archive != null) {
         for (final archiveFile in archive) {
           if (archiveFile.isFile &&
               p.extension(archiveFile.name).toLowerCase() == '.dll') {
@@ -764,7 +756,7 @@ class AdofaiGame extends Game {
     // 언인스톨 후의 최신 로컬 메타데이터 목록 로드
     final updatedInstalledMods = await getInstalledMods(gamePath);
 
-    if (isZip && archive != null) {
+    if (archive != null) {
       if (isUmm) {
         // UMM 모드 설치
         final ummBaseDir = Directory(p.join(gamePath, 'UMMMods'));
@@ -804,7 +796,7 @@ class AdofaiGame extends Game {
           }
         }
       } else {
-        // MelonLoader 모드 설치 (zip)
+        // MelonLoader 모드 설치
         bool hasStructuredDirs = false;
         bool hasGameRootPath = false;
         for (final archiveFile in archive) {
@@ -859,10 +851,15 @@ class AdofaiGame extends Game {
         RegExp(r'[\\/:*?"<>|]'),
         '',
       );
-      final destFileName = '$sanitizedFileName$ext';
+      final destFileName =
+          decodedArchive.wasCompressed && decodedArchive.hasDllSignature
+          ? (sanitizedFileName.toLowerCase().endsWith('.dll')
+                ? sanitizedFileName
+                : '$sanitizedFileName.dll')
+          : '$sanitizedFileName$ext';
       final destPath = p.join(modsDir.path, destFileName);
       final destFile = File(destPath);
-      await destFile.writeAsBytes(fileBytes);
+      await destFile.writeAsBytes(decodedBytes);
       installedFiles.add(p.join('Mods', destFileName));
     }
 

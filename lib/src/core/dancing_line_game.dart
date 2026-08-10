@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:archive/archive.dart';
 import 'game.dart';
 import '../models/mod_model.dart';
 import 'melon_dll_parser.dart';
@@ -192,8 +191,14 @@ class DancingLineGame extends Game {
     final file = File(tempZipPath);
     final bytes = await file.readAsBytes();
     await DebugLog.info('Dancing Line temp zip read: bytes=${bytes.length}');
-    final archive = ZipDecoder().decodeBytes(bytes);
-    await DebugLog.info('Dancing Line zip decoded: entries=${archive.length}');
+    final decodedArchive = await decodeModArchive(bytes);
+    final archive = decodedArchive.archive;
+    if (archive == null) {
+      throw Exception('MelonLoader archive format is not supported.');
+    }
+    await DebugLog.info(
+      'Dancing Line archive decoded: entries=${archive.length}',
+    );
 
     var extractedFiles = 0;
     var extractedDirs = 0;
@@ -333,16 +338,11 @@ class DancingLineGame extends Game {
 
     final installedMods = await getInstalledMods(gamePath);
 
-    bool isZip = false;
-    Archive? archive;
-    try {
-      archive = ZipDecoder().decodeBytes(fileBytes);
-      isZip = archive.isNotEmpty;
-    } catch (_) {
-      isZip = false;
-    }
+    final decodedArchive = await decodeModArchive(fileBytes);
+    final archive = decodedArchive.archive;
+    final decodedBytes = decodedArchive.bytes;
 
-    if (isZip && archive != null) {
+    if (archive != null) {
       bool hasStructuredDirs = false;
       bool hasGameRootPath = false;
       for (final archiveFile in archive) {
@@ -393,7 +393,7 @@ class DancingLineGame extends Game {
       }
       final destPath = p.join(modsDir.path, '${mod.slug}.dll');
       final destFile = File(destPath);
-      await destFile.writeAsBytes(fileBytes);
+      await destFile.writeAsBytes(decodedBytes);
       installedFiles.add(p.join('Mods', '${mod.slug}.dll'));
     }
 
@@ -442,23 +442,16 @@ class DancingLineGame extends Game {
 
     final installedMods = await getInstalledMods(gamePath);
 
-    bool isZip = ext == '.zip';
-    Archive? archive;
-    if (isZip) {
-      try {
-        archive = ZipDecoder().decodeBytes(fileBytes);
-        isZip = archive.isNotEmpty;
-      } catch (_) {
-        isZip = false;
-      }
-    }
+    final decodedArchive = await decodeModArchive(fileBytes);
+    final archive = decodedArchive.archive;
+    final decodedBytes = decodedArchive.bytes;
 
     String finalSlug = baseSlug.toLowerCase();
     String finalName = baseSlug;
     String finalVersion = 'Local';
 
     // MelonLoader DLL 파싱 (MelonInfo 속성 추출)
-    if (isZip && archive != null) {
+    if (archive != null) {
       for (final archiveFile in archive) {
         if (archiveFile.isFile &&
             p.extension(archiveFile.name).toLowerCase() == '.dll') {
@@ -520,7 +513,7 @@ class DancingLineGame extends Game {
     // 언인스톨 후의 최신 로컬 메타데이터 목록 로드
     final updatedInstalledMods = await getInstalledMods(gamePath);
 
-    if (isZip && archive != null) {
+    if (archive != null) {
       bool hasStructuredDirs = false;
       bool hasGameRootPath = false;
       for (final archiveFile in archive) {
@@ -573,10 +566,15 @@ class DancingLineGame extends Game {
         RegExp(r'[\\/:*?"<>|]'),
         '',
       );
-      final destFileName = '$sanitizedFileName$ext';
+      final destFileName =
+          decodedArchive.wasCompressed && decodedArchive.hasDllSignature
+          ? (sanitizedFileName.toLowerCase().endsWith('.dll')
+                ? sanitizedFileName
+                : '$sanitizedFileName.dll')
+          : '$sanitizedFileName$ext';
       final destPath = p.join(modsDir.path, destFileName);
       final destFile = File(destPath);
-      await destFile.writeAsBytes(fileBytes);
+      await destFile.writeAsBytes(decodedBytes);
       installedFiles.add(p.join('Mods', destFileName));
     }
 
